@@ -25,6 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/package.json /app/package-lock.json* /app/yarn.lock* /app/pnpm-lock.yaml* ./
 COPY --from=builder /app/.next /app/.next
 COPY --from=builder /app/public /app/public
+COPY --from=builder /app/src /app/src
 COPY --from=builder /app/node_modules /app/node_modules
 
 # Expõe a porta correta

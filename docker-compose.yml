@@ -8,4 +8,4 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
-    command: [ "npm", "run", "start", "--", "-p", "3001" ]
+    command: [ "npm", "run", "dev", "--", "-p", "3001" ]
