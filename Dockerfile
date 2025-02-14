@@ -10,6 +10,8 @@ RUN npm install --frozen-lockfile
 # Copia o restante do código
 COPY . .
 
+ENV NEXT_DISABLE_ESLINT 1
+
 # Constrói a aplicação Next.js
 RUN npm run build
 

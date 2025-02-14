@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import axios from "axios";
 
@@ -21,6 +22,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -44,17 +46,13 @@ export default function TasksPage() {
   if (loading) return <p className="text-center text-gray-600">Carregando tarefas...</p>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;
 
-  // Função para organizar as tarefas por status
   const getTasksByStatus = (status: string) => tasks.filter((task) => task.status === status);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-200 p-6">
-      {/* Quadro com fundo roxo */}
       <div className="bg-[#7d1bb5] p-6 rounded-lg shadow-xl w-full max-w-6xl">
-        {/* Título principal */}
         <h1 className="text-3xl font-bold text-white text-center mb-6">Your Tasks</h1>
 
-        {/* Quadro com três colunas */}
         <div className="grid grid-cols-3 gap-6">
           {["novo", "em andamento", "concluído"].map((status, index) => (
             <div key={index} className="bg-white p-4 rounded-lg shadow-md min-h-[400px]">
@@ -63,7 +61,11 @@ export default function TasksPage() {
               </h2>
               <div className="space-y-4 p-2 max-h-[300px] overflow-y-auto">
                 {getTasksByStatus(status).slice(0, 10).map((task) => (
-                  <div key={task.id} className="p-4 bg-white shadow-lg rounded-lg border border-gray-300">
+                  <div
+                    key={task.id}
+                    onClick={() => router.push(`/tasks/${task.id}`)}
+                    className="p-4 bg-white shadow-lg rounded-lg border border-gray-300 cursor-pointer hover:bg-gray-100 transition"
+                  >
                     <h3 className="font-bold text-black">{task.title}</h3>
                     <p className="text-black text-sm">Matéria: {task.subject.name}</p>
                     <p className="text-black text-sm">Tópico: {task.topic.name}</p>
