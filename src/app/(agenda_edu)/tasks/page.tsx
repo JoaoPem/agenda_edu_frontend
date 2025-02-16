@@ -15,7 +15,6 @@ export default function TasksPage() {
     fetchTasks(setTasks, setError, setLoading);
   }, []);
 
-  // Função para filtrar tarefas por status
   const getTasksByStatus = (status: string) => {
     return tasks.filter((task) => task.status === status);
   };

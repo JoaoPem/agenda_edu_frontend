@@ -8,8 +8,10 @@ export const handleLogin = async (email: string, password: string, setError: (er
   try {
     const response = await api.post("/login", { user: { email, password } });
     const { token } = response.data;
+    const { name } = response.data;
 
     Cookies.set("token", token);
+    Cookies.set("userName", name)
 
     window.location.href = "/tasks";
   } catch (error) {
