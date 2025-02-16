@@ -1,47 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import api from "@/lib/axios";
-import axios, { AxiosError } from "axios";
+import { handleLogin } from "./content";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await api.post<{ token: string; expires_at: number }>("/login", {
-        user: { email, password },
-      });
-
-      const { token, expires_at } = response.data;
-
-      // Salva o token JWT no cookie (acessível via JS)
-      Cookies.set("token", token, {
-        expires: new Date(expires_at * 1000), // Converte expiração para timestamp
-        secure: true, // Apenas para HTTPS
-        sameSite: "Strict",
-      });
-
-      router.push("/tasks"); // Redireciona após o login
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.error || "Erro ao fazer login");
-      } else {
-        setError("Erro desconhecido ao tentar fazer login");
-      }
-    } finally {
-      setLoading(false);
-    }
+    await handleLogin(email, password, setError, setLoading);
   };
 
   return (
@@ -49,7 +19,7 @@ export default function LoginPage() {
       <div className="bg-white p-6 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium">Email</label>
             <input

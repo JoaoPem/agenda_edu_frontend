@@ -9,10 +9,9 @@ const api = axios.create({
   },
 });
 
-// Interceptor para adicionar o token JWT dos cookies ao header Authorization
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token"); // Pegando o token do cookie
+    const token = Cookies.get("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -21,7 +20,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para tratar erros globais
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -30,9 +28,9 @@ api.interceptors.response.use(
 
       if (status === 401) {
         console.error("Token inválido ou expirado. Redirecionando para login...");
-        Cookies.remove("token"); // Remove o token do cookie
+        Cookies.remove("token");
         if (typeof window !== "undefined") {
-          window.location.href = "/login"; // Redireciona para login
+          window.location.href = "/login";
         }
       } else if (status === 403) {
         console.error("Acesso negado.");

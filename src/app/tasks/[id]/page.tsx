@@ -1,40 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import api from "@/lib/axios";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-
-interface Task {
-  id: number;
-  professor: { name: string };
-  title: string;
-  description: string;
-  deadline: string;
-  class_room: { name: string };
-  subject: { name: string };
-  topic: { name: string };
-  file_url: string;
-  status: string;
-  feedbacks?: {
-    id: number;
-    content: string;
-    created_at: string;
-    user: { id: number; name: string }
-  }[];
-}
+import { Task } from "@/models/tasks";
+import api from "@/api/axios";
 
 export default function TaskDetails() {
   const { id } = useParams();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [newFeedback, setNewFeedback] = useState(""); // Estado para o novo feedback
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTask = async () => {
       try {
         const response = await api.get<Task>(`/usersbackoffice/tasks/${id}`);
-        console.log("Feedbacks recebidos:", response.data.feedbacks); // 👈 LOG PARA DEBUG
         setTask(response.data);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -52,6 +35,33 @@ export default function TaskDetails() {
     }
   }, [id]);
 
+  // Função para enviar um novo feedback
+  const handleSendFeedback = async () => {
+    if (!newFeedback.trim()) return; // Não enviar feedback vazio
+
+    try {
+      const response = await api.post(`/usersbackoffice/tasks/${id}/feedbacks`, {
+        content: newFeedback,
+      });
+
+      // Atualiza a lista de feedbacks com o novo feedback
+      if (task) {
+        setTask({
+          ...task,
+          feedbacks: [response.data, ...task.feedbacks],
+        });
+      }
+
+      setNewFeedback(""); // Limpa o campo de input
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.error || "Erro ao enviar feedback.");
+      } else {
+        setError("Erro desconhecido ao enviar feedback.");
+      }
+    }
+  };
+
   if (loading) return <p className="text-center text-gray-600">Carregando detalhes da tarefa...</p>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;
   if (!task) return <p className="text-gray-500 text-center">Tarefa não encontrada.</p>;
@@ -68,33 +78,33 @@ export default function TaskDetails() {
           <div className="bg-gray-100 p-4 rounded-lg shadow-md min-h-[400px] flex flex-col">
             <h2 className="text-2xl font-semibold text-[#7d1bb5] text-center mb-4">Feedback</h2>
 
+            {/* Lista de feedbacks */}
             <div className="flex flex-col space-y-3 max-h-[300px] overflow-y-auto p-2">
-              {task.feedbacks?.length ? (
-                task.feedbacks.map((feedback) => (
-                  <div
-                    key={feedback.id}
-                    className={`p-3 rounded-lg shadow-md w-fit max-w-[80%] ${feedback.user.id === 5 ? "bg-blue-500 text-white self-end" : "bg-gray-200 text-gray-800 self-start"
-                      }`}
-                  >
-                    <p className="text-sm font-semibold">{feedback.user.name}</p>
-                    <p className="text-sm">{feedback.content}</p>
-                    <p className="text-xs text-gray-500 text-right">{new Date(feedback.created_at).toLocaleString()}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center">Nenhum feedback ainda.</p>
-              )}
+              {task.feedbacks.map((feedback) => (
+                <div key={feedback.id} className="bg-white p-3 rounded-lg shadow-sm">
+                  <p className="text-gray-800">
+                    <strong>{feedback.user.name}:</strong> {feedback.content}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(feedback.created_at).toLocaleString()}
+                  </p>
+                </div>
+              ))}
             </div>
-
 
             {/* Input para enviar feedbacks */}
             <div className="flex items-center mt-4">
               <input
                 type="text"
                 placeholder="Digite seu feedback..."
+                value={newFeedback}
+                onChange={(e) => setNewFeedback(e.target.value)}
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7d1bb5]"
               />
-              <button className="bg-[#7d1bb5] text-white ml-2 px-4 py-2 rounded-lg hover:bg-[#621190] transition">
+              <button
+                onClick={handleSendFeedback}
+                className="bg-[#7d1bb5] text-white ml-2 px-4 py-2 rounded-lg hover:bg-[#621190] transition"
+              >
                 Enviar
               </button>
             </div>
@@ -135,12 +145,11 @@ export default function TaskDetails() {
 
             {/* Botão de Voltar */}
             <div className="flex justify-center mt-4">
-              <button onClick={() => window.history.back()} className="text-[#7d1bb5] text-lg font-semibold hover:underline">
+              <button onClick={() => router.back()} className="text-[#7d1bb5] text-lg font-semibold hover:underline">
                 ← Voltar
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
