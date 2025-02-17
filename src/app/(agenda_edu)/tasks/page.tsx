@@ -28,7 +28,7 @@ export default function TasksPage() {
         <h1 className="text-3xl font-bold text-white text-center mb-6">Your Tasks</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {["novo", "em andamento", "concluído"].map((status, index) => (
+          {["novo", "em_progresso", "concluido"].map((status, index) => (
             <div key={index} className="bg-white p-4 rounded-lg shadow-md min-h-[400px]">
               <h2 className="text-xl font-semibold text-[#7d1bb5] text-center p-2">
                 {(status.toUpperCase())}
